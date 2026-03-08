@@ -1,0 +1,13 @@
+.env
+*.log
+__pycache__/
+*.pyc
+
+# Local runtime state
+active_trades.json
+blacklist.json
+trade_history.json
+
+# Local tooling
+.venv/
+venv/

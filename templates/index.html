@@ -1,0 +1,1005 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ERC-BOT PRO Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
+
+    <style>
+        :root {
+            --bg-dark: #0d1117;
+            --bg-card: #161b22;
+            --border: #30363d;
+            --text-main: #c9d1d9;
+            --text-dim: #8b949e;
+            --primary: #58a6ff;
+            --success: #3fb950;
+            --danger: #f85149;
+            --warning: #d29922;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+            font-size: 0.8rem;
+            line-height: 1.4;
+        }
+
+        .container-fluid {
+            padding: 0 10px;
+        }
+
+        .card {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            margin-bottom: 8px !important;
+            box-shadow: none;
+        }
+
+        .card-header {
+            background-color: #161b22;
+            border-bottom: 1px solid var(--border);
+            padding: 4px 8px;
+            font-weight: 600;
+            font-size: 0.75rem;
+            color: var(--text-dim);
+        }
+
+        .table {
+            color: var(--text-main);
+            margin-bottom: 0;
+        }
+
+        .table-dark {
+            --bs-table-bg: #161b22;
+        }
+
+        .table th {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            color: var(--text-dim);
+            padding: 4px 8px;
+        }
+
+        .table td {
+            padding: 4px 8px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .btn-sm {
+            padding: 2px 8px;
+            font-size: 0.7rem;
+        }
+
+        .badge {
+            font-size: 0.65rem;
+            padding: 2px 6px;
+        }
+
+        .log-container {
+            height: 300px;
+            overflow-y: auto;
+            font-family: 'JetBrains Mono', 'Fira Code', monospace;
+            font-size: 0.7rem;
+            background: #000;
+            padding: 8px;
+            border-radius: 4px;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #0f172a;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 4px;
+        }
+
+        .blink-red {
+            animation: blink-r 1s infinite alternate;
+        }
+
+        @keyframes blink-r {
+            from {
+                opacity: 1;
+            }
+
+            to {
+                opacity: 0.5;
+                color: #ff6666;
+            }
+
+            50% {
+                opacity: 0.5;
+            }
+        }
+
+        .blinking-red {
+            animation: blink-red 1s infinite;
+        }
+
+        .blinking {
+            animation: blink-anim 1s infinite;
+        }
+
+        @keyframes blink-anim {
+            0% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.4;
+            }
+
+            100% {
+                opacity: 1;
+            }
+        }
+
+        @keyframes blink-red {
+            0% {
+                box-shadow: 0 0 5px #ff0000;
+            }
+
+            50% {
+                box-shadow: 0 0 20px #ff0000;
+            }
+
+            100% {
+                box-shadow: 0 0 5px #ff0000;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark py-1 border-bottom border-secondary">
+        <div class="container-fluid">
+            <a class="navbar-brand fw-bold" href="#" style="font-size: 0.9rem;">
+                <i class="fas fa-robot text-primary me-2"></i>ERC-BOT PRO <span class="badge bg-warning text-dark ms-2"
+                    style="font-size: 0.5rem;">V5.0</span>
+            </a>
+            <div class="d-flex align-items-center" style="font-size: 0.7rem;">
+                <span class="me-3 text-secondary" id="last-update">Senkronize</span>
+                <div id="status-badge" class="badge bg-secondary">Yükleniyor</div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid py-2">
+        <div class="row g-2">
+
+            <!-- LEFT COLUMN: SETTINGS & PROFIT (col-lg-2) -->
+            <div class="col-lg-2">
+                <!-- NET PROFIT CARD (NEW) -->
+                <div class="card shadow mb-4">
+                    <div
+                        class="card-header border-start border-4 border-warning bg-warning bg-opacity-10 text-warning d-flex justify-content-between align-items-center">
+                        <span><i class="fa-solid fa-scale-balanced me-2"></i>NET KAR/ZARAR</span>
+                        <small class="text-muted">(Komisyon Dahil)</small>
+                    </div>
+                    <div class="card-body text-center p-4">
+                        <h2 class="display-6 fw-bold mb-0 text-white" id="total-pnl"
+                            style="text-shadow: 0 0 10px rgba(255,255,255,0.2);">0.00 TL</h2>
+                        <span class="badge bg-secondary mt-2" id="total-trades">0 İşlem</span>
+                    </div>
+                </div>
+
+                <!-- WALLET CARD -->
+                <div class="card shadow">
+                    <div
+                        class="card-header border-start border-4 border-success d-flex justify-content-between align-items-center">
+                        <span><i class="fa-solid fa-wallet me-2"></i>VARLIKLARIM</span>
+                        <span class="badge bg-success bg-opacity-10 text-success">Canlı</span>
+                    </div>
+                    <div class="card-body p-0">
+                        <!-- TL HEADER (Static) -->
+                        <div class="bg-transparent text-white p-3 text-center border-bottom border-secondary">
+                            <h2 class="fw-bold mb-0 text-success"><span id="tl-avail">0.00</span> <small
+                                    class="fs-6 text-muted">TL</small></h2>
+                            <small class="text-muted" style="font-size: 0.75rem;">Toplam: <span
+                                    id="tl-total">0.00</span> TL</small>
+                        </div>
+
+                        <!-- DYNAMIC LIST -->
+                        <div id="wallet-content">
+                            <div class="text-center p-4 text-muted"><i class="fa-solid fa-circle-notch fa-spin"></i>
+                                Yükleniyor...</div>
+                        </div>
+
+                        <!-- TOTAL FOOTER (Static) -->
+                        <div class="bg-dark text-white p-3 text-center border-top border-secondary">
+                            <small class="text-muted text-uppercase" style="font-size: 10px;">TOPLAM VARLIK (Nakit +
+                                Coin)</small>
+                            <h3 class="fw-bold text-success mb-0"><span id="grand-total">0.00</span> TL</h3>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CONTROL PANEL (CONTROLS moved here) -->
+                <div class="card shadow-sm">
+                    <div class="card-header py-1 border-start border-4 border-info bg-info bg-opacity-10 text-info">
+                        CONTROLS
+                    </div>
+                    <div class="card-body p-2">
+                        <form method="POST" action="/update_settings" style="font-size: 0.75rem;">
+                            <!-- Moved from Right Side -->
+                            <div class="mb-1">
+                                <label class="text-muted small">Tarama(sn)</label>
+                                <input type="number" name="interval"
+                                    class="form-control form-control-sm bg-dark text-white border-secondary h-auto py-0"
+                                    value="{{ interval }}">
+                            </div>
+                            <div class="mb-1">
+                                <label class="text-success small">Alım(%)</label>
+                                <input type="number" step="0.1" name="threshold"
+                                    class="form-control form-control-sm bg-dark text-white border-success h-auto py-0"
+                                    value="{{ threshold }}">
+                            </div>
+                            <div class="mb-1">
+                                <label class="text-danger small">Stop(%)</label>
+                                <input type="number" step="0.1" name="sell_threshold"
+                                    class="form-control form-control-sm bg-dark text-white border-danger h-auto py-0"
+                                    value="{{ sell_threshold|default(-2.0) }}">
+                            </div>
+                            <div class="mb-1">
+                                <label class="text-warning small">KarAl(%)</label>
+                                <input type="number" step="0.1" name="take_profit_percent"
+                                    class="form-control form-control-sm bg-dark text-white border-warning h-auto py-0"
+                                    value="{{ take_profit_percent|default(5.0) }}">
+                            </div>
+                            <div class="mb-2">
+                                <label class="text-info small">Bütçe(%)</label>
+                                <input type="number" name="trade_percent"
+                                    class="form-control form-control-sm bg-dark text-white border-info h-auto py-0"
+                                    value="{{ trade_percent|default(99) }}">
+                            </div>
+                            <button type="submit" class="btn btn-warning btn-sm w-100 py-1 fw-bold">KAYDET</button>
+                            <button type="button" id="toggle-btn" class="btn btn-danger btn-sm w-100 py-1 mt-1 fw-bold"
+                                onclick="toggleBot()">DURDUR</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CENTER COLUMN (col-lg-7) -->
+            <div class="col-lg-7">
+                <!-- AI RECOMMENDATIONS CARD (NEW) -->
+                <div class="card shadow mb-4 border-start border-4 border-warning">
+                    <div
+                        class="card-header bg-warning bg-opacity-10 text-warning d-flex justify-content-between align-items-center">
+                        <div class="d-flex align-items-center">
+                            <span><i class="fa-solid fa-brain me-2"></i>YAPAY ZEKA ÖNERİLERİ</span>
+                            <button class="btn btn-sm btn-outline-danger ms-3" id="fomo-btn" onclick="toggleFomo()"
+                                title="Riskli Mod: RSI yüksek olsa bile ani yükselişleri alır">
+                                <i class="fa-solid fa-rocket me-1"></i>FOMO Modu
+                            </button>
+                        </div>
+                        <small class="text-muted blinking">Canlı Analiz</small>
+                    </div>
+                    <div class="card-body p-0">
+                        <ul class="list-group list-group-flush bg-transparent" id="recommendations-content">
+                            <li class="list-group-item bg-transparent text-warning text-center py-3 small">
+                                <i class="fa-solid fa-spinner fa-spin me-2"></i>Fırsatlar aranıyor...
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- MARKET DATA -->
+                <div class="card shadow mb-4">
+                    <div
+                        class="card-header border-start border-4 border-primary d-flex justify-content-between align-items-center">
+                        <span><i class="fa-solid fa-chart-line me-2"></i>PİYASA VE FIRSATLAR</span>
+                        <span class="badge bg-primary bg-opacity-10 text-primary" id="market-count">0 Coin</span>
+                    </div>
+                    <div class="card-body p-0 table-responsive" style="max-height: 500px; overflow-y: auto;">
+                        <!-- ADDED table-dark CLASS HERE -->
+                        <table class="table table-dark table-hover mb-0 align-middle">
+                            <thead>
+                                <tr class="text-secondary small text-uppercase">
+                                    <th>Coin</th>
+                                    <th class="text-end">Fiyat (B/P)</th>
+                                    <th class="text-end">Değişim (24s)</th>
+                                    <th class="text-end">Hacim</th>
+                                    <th class="text-end">Spread</th>
+                                    <th class="text-start ps-4">Analiz & Sinyal</th>
+                                    <th class="text-center">İncele</th>
+                                </tr>
+                            </thead>
+                            <tbody id="market-table-body">
+                                <!-- Rows injected by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- TRADE HISTORY (NEW) -->
+                <div class="card shadow">
+                    <div
+                        class="card-header border-start border-4 border-secondary d-flex justify-content-between align-items-center">
+                        <span><i class="fa-solid fa-clock-rotate-left me-2"></i>GEÇMİŞ İŞLEMLER</span>
+                    </div>
+                    <div class="card-body p-0 table-responsive" style="max-height: 300px; overflow-y: auto;">
+                        <table class="table table-dark table-sm table-hover mb-0"
+                            style="font-size: 0.85rem; border-collapse: separate; border-spacing: 0 4px;">
+                            <thead>
+                                <tr class="text-white opacity-75"
+                                    style="font-size: 0.75rem; border-bottom: 2px solid #334155;">
+                                    <th class="ps-3 py-2">Zaman</th>
+                                    <th class="py-2">Coin</th>
+                                    <th class="py-2">İşlem</th>
+                                    <th class="py-2">Maliyet & Satış</th>
+                                    <th class="text-end pe-3 py-2">Net Kâr</th>
+                                </tr>
+                            </thead>
+                            <tbody id="history-table-body">
+                                <tr>
+                                    <td colspan="5" class="text-center text-muted py-3">Kayıt yok</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- RIGHT COLUMN (col-lg-3) -->
+            <div class="col-lg-3">
+
+                <!-- WALLET (Moved here) -->
+                <div class="card shadow-sm mb-2 border-start border-4 border-success">
+                    <div
+                        class="card-header py-1 bg-success bg-opacity-10 d-flex justify-content-between align-items-center">
+                        <span class="text-success small fw-bold">VARLIKLARIM</span>
+                        <div class="fw-bold text-success" id="grand-total-right">0.00 TL</div>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="bg-dark p-1 text-center border-bottom border-secondary small"
+                            style="font-size: 0.7rem;">
+                            Nakit: <span class="text-white" id="tl-avail-right">0.00</span> TL
+                        </div>
+                        <div id="wallet-content-right" style="max-height: 250px; overflow-y: auto;"></div>
+                    </div>
+                </div>
+
+                <!-- ACTIVE POSITIONS (Moved here) -->
+                <div class="card shadow-sm mb-2 border-start border-4 border-info">
+                    <div class="card-header py-1 bg-info bg-opacity-10 d-flex justify-content-between">
+                        <span class="text-info small fw-bold">AÇIK İŞLEMLER</span>
+                        <span class="badge bg-info" id="active-count">0</span>
+                    </div>
+                    <div class="card-body p-0" id="active-trades-content" style="max-height: 450px; overflow-y: auto;">
+                    </div>
+                </div>
+
+                <!-- SYSTEM LOGS -->
+                <div class="card shadow-sm">
+                    <div class="card-header py-1 bg-black text-secondary" style="font-size: 0.65rem;">
+                        <i class="fa-solid fa-terminal me-1"></i>TERMINAL LOGS
+                    </div>
+                    <div class="card-body p-1 bg-black">
+                        <div id="log-content" class="log-container" style="height: 400px;"></div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+    </div>
+
+    <!-- JAVASCRIPT FOR DYNAMIC UPDATES -->
+    <script>
+        function toggleBot() {
+            fetch('/toggle_bot', { method: 'POST' })
+                .then(response => response.json())
+                .then(data => {
+                    updateButtonState(data.running);
+                });
+        }
+
+        function updateButtonState(isRunning) {
+            const btn = document.getElementById('toggle-btn');
+            if (isRunning) {
+                btn.className = 'btn btn-danger w-100 fw-bold shadow-sm';
+                btn.innerHTML = '<i class="fa-solid fa-power-off me-2"></i>SİSTEMİ DURDUR';
+            } else {
+                btn.className = 'btn btn-success w-100 fw-bold shadow-sm blink-red';
+                btn.innerHTML = '<i class="fa-solid fa-play me-2"></i>SİSTEMİ BAŞLAT';
+            }
+        }
+
+        function manualSell(coin) {
+            if (confirm(coin + " coinini ANLIK FİYATTAN satmak istiyor musunuz?")) {
+                fetch('/api/manual_sell/' + coin, { method: 'POST' })
+                    .then(r => r.json())
+                    .then(d => {
+                        alert(d.message);
+                        updateDashboard();
+                    });
+            }
+        }
+
+        function editCost(coin) {
+            let newPrice = prompt(coin + " için GERÇEK alış maliyetini girin (Örn: 2.15):");
+            if (newPrice) {
+                fetch('/api/update_cost/' + coin, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ price: newPrice })
+                })
+                    .then(r => r.json())
+                    .then(d => {
+                        alert(d.message);
+                        updateDashboard();
+                    });
+            }
+        }
+
+        function updateDashboard() {
+            fetch('/api/data')
+                .then(response => response.json())
+                .then(data => {
+                    // 1. Status Badge & Button Sync
+                    const badge = document.getElementById('status-badge');
+                    updateButtonState(data.running);
+
+                    if (data.running) {
+                        badge.className = 'badge bg-success blinking';
+                        badge.innerText = '● SİSTEM AKTİF';
+                    } else {
+                        badge.className = 'badge bg-danger';
+                        badge.innerText = '■ DURDURULDU';
+                    }
+
+                    // 2. Wallet Update (Stable)
+                    let tlTotal = 0;
+                    let tlAvail = 0;
+
+                    if (data.wallet && data.wallet.TL) {
+                        if (typeof data.wallet.TL === 'object') {
+                            tlTotal = data.wallet.TL.total || 0;
+                            tlAvail = data.wallet.TL.available || 0;
+                        } else {
+                            tlAvail = data.wallet.TL;
+                            tlTotal = tlAvail;
+                        }
+                    }
+
+                    // Update Static Header Spans
+                    document.getElementById('tl-avail').innerText = parseFloat(tlAvail).toFixed(2);
+                    document.getElementById('tl-avail-right').innerText = parseFloat(tlAvail).toFixed(2);
+                    document.getElementById('tl-total').innerText = parseFloat(tlTotal).toFixed(2);
+
+                    const walletDiv = document.getElementById('wallet-content');
+                    const walletDivRight = document.getElementById('wallet-content-right');
+                    let walletHtml = '<ul class="list-group list-group-flush bg-transparent">';
+                    let coinsFound = 0;
+                    let grandTotal = parseFloat(tlTotal);
+
+                    if (data.wallet) {
+                        for (const [coin, info] of Object.entries(data.wallet)) {
+                            if (coin === 'TL' || coin === 'error') continue;
+                            let amount = typeof info === 'object' ? info.total : info;
+                            if (amount > 0) {
+                                let estVal = info.est_tl || 0;
+                                grandTotal += estVal;
+
+                                // HIDE DUST: Only hide if we actually have the price AND it's below 1 TL.
+                                // If est_tl is missing/0 (price not loaded yet), show the coin.
+                                if (info.est_tl !== undefined && info.est_tl > 0 && estVal < 1.0) continue;
+                                coinsFound++;
+
+                                walletHtml += `
+                                    <div class="px-2 py-1 border-bottom border-secondary d-flex justify-content-between align-items-center wallet-item" style="font-size: 0.75rem;">
+                                        <div class="d-flex align-items-center">
+                                            <input type="checkbox" class="form-check-input me-2 bg-dark border-secondary h-auto" 
+                                                style="width: 12px; height: 12px;"
+                                                id="chk_${coin}"
+                                                ${data.blacklist && data.blacklist.includes(coin) ? 'checked' : ''} 
+                                                onclick="toggleBlacklist('${coin}')">
+                                            <div class="${data.blacklist && data.blacklist.includes(coin) ? 'text-danger text-decoration-line-through' : 'text-white'}">
+                                                <span class="fw-bold">${coin}</span>
+                                                <small class="text-muted d-block" style="font-size: 0.6rem;">${parseFloat(amount).toFixed(4)}</small>
+                                            </div>
+                                        </div>
+                                        <div class="text-end">
+                                            <div class="text-success fw-bold">${parseFloat(estVal).toFixed(2)} ₺</div>
+                                            <button class="btn btn-xxs btn-outline-danger py-0 px-1" style="font-size: 0.6rem;" onclick="sellCoin('${coin}')">SAT</button>
+                                        </div>
+                                    </div>
+                                `;
+                            }
+                        }
+                    }
+
+                    if (coinsFound === 0) {
+                        walletHtml += '<li class="list-group-item bg-transparent text-muted text-center py-3 small">Bakiye yok</li>';
+                    }
+
+                    walletHtml += '</ul>';
+                    walletDiv.innerHTML = walletHtml;
+                    if (walletDivRight) walletDivRight.innerHTML = walletHtml;
+                    document.getElementById('grand-total').innerText = grandTotal.toFixed(2);
+                    document.getElementById('grand-total-right').innerText = grandTotal.toFixed(2) + " TL";
+
+                    // 3. Active Trades Update (New Section)
+                    const activeDiv = document.getElementById('active-trades-content');
+                    const activeCountBadge = document.getElementById('active-count');
+                    let activeHtml = '';
+                    let activeCount = 0;
+
+                    if (data.active_trades && Object.keys(data.active_trades).length > 0) {
+                        activeCount = Object.keys(data.active_trades).length;
+                        for (const [coin, tradeData] of Object.entries(data.active_trades)) {
+                            // HANDLE NEW DATA STRUCTURE (Dict vs Float)
+                            let entryPrice = 0;
+                            if (typeof tradeData === 'object' && tradeData !== null) {
+                                entryPrice = parseFloat(tradeData.price || 0);
+                            } else {
+                                entryPrice = parseFloat(tradeData); // Legacy support
+                            }
+
+                            // Try to calculate current profit/loss if we have market data
+                            let currentPrice = 0;
+                            let pnlHtml = '';
+
+                            // Find coin in market data
+                            if (data.market_data) {
+                                const mData = data.market_data.find(m => m.coin === coin);
+                                if (mData && mData.paribu) {
+                                    currentPrice = parseFloat(mData.paribu);
+                                    if (entryPrice > 0) {
+                                        let pnl = ((currentPrice - entryPrice) / entryPrice) * 100;
+                                        let pnlColor = pnl >= 0 ? 'text-success' : 'text-danger';
+                                        pnlHtml = `<span class="${pnlColor} fw-bold ms-2">(%${pnl.toFixed(2)})</span>`;
+                                    } else {
+                                        pnlHtml = `<span class="text-muted ms-2">(%0.00)</span>`;
+                                    }
+                                }
+                            }
+
+                            // Calculate Target (Fallback if missing)
+                            let targetPrice = parseFloat(tradeData.target_price || (entryPrice * 1.05));
+
+                            activeHtml += `
+                                <div class="p-2 border-bottom border-secondary wallet-item" style="font-size: 0.75rem;">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <span class="fw-bold text-info">${coin}</span>
+                                        ${pnlHtml}
+                                    </div>
+                                    <div class="d-flex justify-content-between text-white-50 mt-1" style="font-size: 0.65rem;">
+                                        <span class="text-info">G:${entryPrice.toFixed(4)}</span>
+                                        <span class="text-white">A:${currentPrice ? currentPrice.toFixed(4) : '-'}</span>
+                                        <span class="text-warning">H:${targetPrice.toFixed(4)}</span>
+                                    </div>
+                                    <div class="mt-1 text-center">
+                                        <button onclick="editCost('${coin}')" class="btn btn-xxs btn-outline-warning py-0" style="font-size: 0.6rem;">DÜZENLE</button>
+                                        <button onclick="deleteTrade('${coin}')" class="btn btn-xxs btn-outline-secondary py-0" style="font-size: 0.6rem;">KALDIR</button>
+                                        <button onclick="sellCoin('${coin}')" class="btn btn-xxs btn-danger py-0" style="font-size: 0.6rem;">SAT</button>
+                                    </div>
+                                </div>
+                            `;
+                        }
+                    } else {
+                        activeHtml = '<li class="list-group-item bg-transparent text-muted text-center py-3 small">Henüz işlem yok</li>';
+                    }
+                    activeDiv.innerHTML = activeHtml;
+                    activeCountBadge.innerText = activeCount;
+
+
+                    // 3. Table Update
+                    const marketTableBody = document.getElementById('market-table-body');
+                    let rowsHtml = '';
+
+                    // UPDATE FOMO BUTTON STATE
+                    const fomoBtn = document.getElementById('fomo-btn');
+                    if (data.fomo_mode) {
+                        // ON STATE: Green, Pulsing, Toggle On Icon
+                        fomoBtn.className = 'btn btn-sm btn-success ms-3 fw-bold blinking-red'; // Keeping animation
+                        fomoBtn.innerHTML = '<i class="fa-solid fa-toggle-on me-1"></i>FOMO: AKTİF';
+                    } else {
+                        // OFF STATE: Grey, Toggle Off Icon
+                        fomoBtn.className = 'btn btn-sm btn-outline-secondary ms-3';
+                        fomoBtn.innerHTML = '<i class="fa-solid fa-toggle-off me-1"></i>FOMO: KAPALI';
+                    }
+                    if (data.market_data && data.market_data.length > 0) {
+                        window.latestData = data.market_data;
+                        document.getElementById('market-count').innerText = data.market_data.length + ' Coin';
+                        data.market_data.forEach(item => {
+                            try {
+                                let sent = item.sentiment || 'DURGUN';
+                                let badgeClass = 'bg-secondary';
+                                if (sent.includes('AL')) badgeClass = 'bg-success';
+                                if (sent.includes('SAT')) badgeClass = 'bg-danger';
+                                if (sent === 'DURGUN' || sent === 'SIRA BEKLEMEDE') badgeClass = 'bg-dark border border-secondary text-secondary';
+                                if (sent === 'GÜÇLÜ AL') badgeClass = 'bg-success bg-gradient blinking';
+                                if (sent.includes('SIRA')) badgeClass = 'bg-dark text-muted border border-secondary';
+
+                                let momColor = (item.momentum || 0) > 0 ? 'text-success' : 'text-danger';
+
+                                // Format numbers safely
+                                let bPrice = item.binance ? item.binance : '-';
+                                let pPrice = item.paribu ? item.paribu : '-';
+                                let change = parseFloat(item.change || 0);
+                                let changeColor = change >= 0 ? "text-success" : "text-danger";
+                                let volRaw = parseFloat(item.volume || 0);
+                                let vol = volRaw.toLocaleString('tr-TR');
+                                let spread = parseFloat(item.spread || 0);
+                                let spreadBadge = spread > 1.0 ? `<span class="badge bg-danger">RISK %${spread.toFixed(2)}</span>` : `<span class="badge bg-success bg-opacity-25 text-success">%${spread.toFixed(2)}</span>`;
+
+                                // TA Desc
+                                let desc = item.desc || "";
+                                let rsiVal = item.rsi || 50;
+                                let rsiColor = rsiVal < 30 ? 'text-success' : (rsiVal > 70 ? 'text-danger' : 'text-muted');
+
+
+                                rowsHtml += `
+                                <tr>
+                                    <td class="fw-bold text-white">
+                                        <div class="d-flex align-items-center">
+                                            <div>
+                                                <div>${item.coin}</div>
+                                                <div style="font-size: 10px;" class="text-muted">RSI: <span class="${rsiColor}">${rsiVal}</span></div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="text-end number-font">
+                                        <div class="text-white small fw-bold">${pPrice} ₺</div>
+                                        <div class="text-muted" style="font-size: 10px;">$${bPrice}</div>
+                                    </td>
+                                    <td class="text-end fw-bold ${changeColor}">%${Math.abs(change).toFixed(2)}</td>
+                                    <td class="text-end text-light small opacity-75">${vol} ₺</td>
+                                    <td class="text-end small">${spreadBadge}</td>
+                                    
+                                    <td class="text-start ps-4">
+                                        <div class="small text-info mb-1">${desc}</div>
+                                        <span class="badge ${badgeClass} px-2">${item.sentiment}</span>
+                                    </td>
+                                    <td class="text-center">
+                                         <button class="btn btn-sm btn-outline-info" onclick="openDetailModal('${item.coin}')"><i class="fa-solid fa-magnifying-glass"></i></button>
+                                    </td>
+                                </tr>
+                            `;
+                            } catch (e) { console.error("Row Error:", e); }
+                        });
+                    } else {
+                        rowsHtml = '<tr><td colspan="7" class="text-center py-5 text-muted">Veri bekleniyor...</td></tr>';
+                    }
+                    if (marketTableBody) marketTableBody.innerHTML = rowsHtml;
+
+                    // 5. HISTORY & TOTAL PNL UPDATE (NEW)
+                    if (data.trade_history) {
+                        let totalPnL = 0;
+                        let historyHtml = '';
+
+                        // Sort newest first
+                        // Sort newest first
+                        const sortedHistory = data.trade_history.slice().reverse();
+
+                        sortedHistory.forEach(trade => {
+                            // Safer Float Parsing with Fallback to 0
+                            let pnlVal = trade.net_pnl !== undefined ? parseFloat(trade.net_pnl) : 0.0;
+                            totalPnL += pnlVal;
+
+                            let pnlColor = pnlVal > 0 ? 'text-success' : (pnlVal < 0 ? 'text-danger' : 'text-muted');
+
+                            // ACTION BADGE (Standardized)
+                            let action = (trade.action || 'SELL').toUpperCase();
+                            let actionBadge = '';
+                            if (action === 'BUY') actionBadge = '<span class="badge bg-primary px-2">ALIM</span>';
+                            else if (action === 'SELL') actionBadge = '<span class="badge bg-danger px-2">SATIŞ</span>';
+                            else actionBadge = `<span class="badge bg-warning text-dark px-2">${action}</span>`;
+
+                            let tRaw = trade.time || '-';
+                            let timeDisplay = '-';
+                            if (typeof tRaw === 'string') {
+                                if (tRaw.includes(' ')) timeDisplay = tRaw.split(' ')[1];
+                                else if (tRaw.includes('T')) timeDisplay = tRaw.split('T')[1].substring(0, 5);
+                                else timeDisplay = tRaw;
+                            } else if (typeof tRaw === 'number') {
+                                let d = new Date(tRaw > 10000000000 ? tRaw : tRaw * 1000);
+                                timeDisplay = d.getHours().toString().padStart(2, '0') + ':' + d.getMinutes().toString().padStart(2, '0');
+                            }
+
+                            // Details (Professional View)
+                            let buyPrice = parseFloat(trade.buy_price || trade.price || 0);
+                            let sellPrice = parseFloat(trade.sell_price || 0);
+                            let amountDisplay = trade.amount ? parseFloat(trade.amount).toLocaleString('tr-TR') : '-';
+
+                            let detailHtml = '';
+                            if (action === 'BUY') {
+                                detailHtml = `<div class="text-white fw-bold">${buyPrice.toFixed(4)} <span class="text-white-50 small">₺</span></div>
+                                              <div class="text-info" style="font-size: 0.7rem;">${amountDisplay} Adet Alındı</div>`;
+                            } else {
+                                detailHtml = `<div class="d-flex align-items-center">
+                                                <span class="text-white-50 small me-1">M:</span> <span class="text-white">${buyPrice.toFixed(4)}</span>
+                                                <i class="fa-solid fa-arrow-right mx-1 text-white-50" style="font-size: 0.6rem;"></i>
+                                                <span class="text-success fw-bold">${sellPrice > 0 ? sellPrice.toFixed(4) : '-'}</span>
+                                              </div>
+                                              <div class="text-info" style="font-size: 0.7rem;">${amountDisplay} Adet Satıldı</div>`;
+                            }
+
+                            historyHtml += `
+                                <tr class="bg-secondary bg-opacity-10 mb-1" style="border-left: 3px solid ${action === 'BUY' ? '#3b82f6' : '#ef4444'}">
+                                    <td class="text-secondary small align-middle ps-3" style="font-size: 0.7rem;">${timeDisplay}</td>
+                                    <td class="fw-bold text-warning align-middle">${trade.coin}</td>
+                                    <td class="align-middle">${actionBadge}</td>
+                                    <td class="align-middle">${detailHtml}</td>
+                                    <td class="text-end fw-bold ${pnlColor} align-middle pe-3">
+                                        ${action === 'SELL' ? pnlVal.toFixed(2) + ' ₺' : '-'}
+                                    </td>
+                                </tr>
+                            `;
+                        });
+
+                        // Update Total PnL Card
+                        const pnlEl = document.getElementById('total-pnl');
+                        pnlEl.innerText = totalPnL.toFixed(2) + " TL";
+                        // Update Total PnL Card with Color and Glow
+                        if (totalPnL >= 0) {
+                            pnlEl.className = 'display-6 fw-bold mb-0 text-success';
+                            pnlEl.style.textShadow = "0 0 15px rgba(16, 185, 129, 0.4)"; // Green Glow
+                        } else {
+                            pnlEl.className = 'display-6 fw-bold mb-0 text-danger';
+                            pnlEl.style.textShadow = "0 0 15px rgba(239, 68, 68, 0.4)"; // Red Glow
+                        }
+
+                        document.getElementById('total-trades').innerText = sortedHistory.length + " İşlem";
+
+                        // Update History Table
+                        if (historyHtml) document.getElementById('history-table-body').innerHTML = historyHtml;
+                    }
+
+                    // 6. Logs Update
+                    const logContent = document.getElementById('log-content');
+
+                    let logsHtml = '';
+                    data.logs.slice().forEach(log => {
+                        let color = '#aaa'; // Default grey
+                        if (log.includes('AL')) color = '#22c55e'; // Bright Green
+                        if (log.includes('SAT')) color = '#ef4444'; // Bright Red
+                        if (log.includes('KAR AL')) color = '#eab308'; // Gold
+                        if (log.includes('Hata') || log.includes('Error') || log.includes('⚠️')) color = '#f87171'; // Light Red
+
+                        logsHtml += `<div style="color: ${color}; border-bottom: 1px solid #333; padding: 5px 0; font-size: 13px;">> ${log}</div>`;
+                    });
+                    logContent.innerHTML = logsHtml;
+
+                    // 7. Update Recommendations
+                    if (data.recommendations) updateRecommendations(data.recommendations);
+                })
+                .catch(err => console.error('Data fetch error:', err));
+        }
+
+        // --- NEW RECOMMENDER LOGIC ---
+        function updateRecommendations(recs) {
+            const el = document.getElementById('recommendations-content');
+            if (!recs || recs.length === 0) {
+                el.innerHTML = '<li class="list-group-item bg-transparent text-white-50 text-center py-3 small">Şu an güçlü bir fırsat yok.</li>';
+                return;
+            }
+
+            let html = '';
+            recs.forEach(rec => {
+                let conf = rec.ta_info ? rec.ta_info.confidence : 50;
+                let color = conf > 80 ? 'text-success' : 'text-warning';
+
+                html += `
+                    <li class="list-group-item bg-transparent text-white d-flex justify-content-between align-items-center py-2 px-3">
+                        <div class="d-flex align-items-center">
+                            <span class="badge bg-warning text-dark me-2">%${conf}</span>
+                            <div>
+                                <div class="fw-bold">${rec.coin}</div>
+                                <div style="font-size: 10px;" class="text-light">${rec.desc || 'Trend Yakalandı'}</div>
+                            </div>
+                        </div>
+                        <button class="btn btn-sm btn-success fw-bold px-3" style="font-size: 0.8rem;">
+                            AL
+                        </button>
+                    </li>
+                `;
+            });
+            el.innerHTML = html;
+        }
+
+        // --- DELETE ACTIONS ---
+        function deleteTrade(coin) {
+            if (!confirm(coin + " pozisyonunu silmek istediğinize emin misiniz? (Bakiye satılmaz, sadece listeden kalkar)")) return;
+            fetch('/api/delete_trade/' + coin, { method: 'POST' })
+                .then(r => updateDashboard());
+        }
+
+        function deleteHistory(index) {
+            if (!confirm("Bu geçmiş kaydını silmek istediğinize emin misiniz?")) return;
+            fetch('/api/delete_history/' + index, { method: 'POST' })
+                .then(r => updateDashboard());
+        }
+
+        function toggleBlacklist(coin) {
+            fetch('/api/toggle_blacklist/' + coin, { method: 'POST' })
+                .then(r => updateDashboard());
+        }
+
+        function toggleFomo() {
+            fetch('/api/toggle_fomo', { method: 'POST' })
+                .then(r => updateDashboard());
+        }
+
+        function sellCoin(coin) {
+            if (!confirm(coin + " varlığının TAMAMINI piyasa fiyatından satmak istediğinize emin misiniz?")) return;
+
+            fetch('/api/manual_sell/' + coin, { method: 'POST' })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'ok') {
+                        alert("Satış Emri İletildi! ✅\n" + data.message);
+                        updateDashboard();
+                    } else {
+                        alert("Hata: " + data.message);
+                    }
+                })
+                .catch(err => alert("Bağlantı Hatası: " + err));
+        }
+
+        // Run on load
+        updateDashboard();
+        // Refresh every 2 seconds
+        setInterval(updateDashboard, 2000);
+    </script>
+    <!-- DETAIL MODAL -->
+    <div class="modal fade" id="detailModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-centered">
+            <div class="modal-content bg-dark border border-secondary shadow-lg">
+                <div class="modal-header border-bottom border-secondary">
+                    <h5 class="modal-title text-white fw-bold"><i class="fa-solid fa-chart-line me-2"></i><span
+                            id="modal-title">DETAY</span></h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <!-- LEFT: CHART -->
+                        <div class="col-lg-8 mb-3">
+                            <div id="tv_chart_container"
+                                style="height: 450px; width: 100%; border-radius: 8px; overflow: hidden;"></div>
+                        </div>
+
+                        <!-- RIGHT: STATS & ORDER BOOK -->
+                        <div class="col-lg-4">
+                            <!-- STATS CARD -->
+                            <div class="card bg-secondary bg-opacity-10 mb-3">
+                                <div class="card-header small text-uppercase text-muted">Piyasa Verileri</div>
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between mb-2">
+                                        <span class="text-secondary">Fiyat (Paribu):</span>
+                                        <span class="fw-bold text-white" id="modal-price">0 TL</span>
+                                    </div>
+                                    <div class="d-flex justify-content-between mb-2">
+                                        <span class="text-secondary">Hacim (24s):</span>
+                                        <span class="text-white" id="modal-vol">0 TL</span>
+                                    </div>
+                                    <div class="d-flex justify-content-between mb-2">
+                                        <span class="text-secondary">Spread (Makas):</span>
+                                        <span id="modal-spread" class="badge bg-dark">0%</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- ORDER BOOK VISUAL -->
+                            <div class="card bg-secondary bg-opacity-10 mb-3">
+                                <div class="card-header small text-uppercase text-muted">Derinlik (Order Book)</div>
+                                <div class="card-body text-center">
+                                    <div class="row g-1">
+                                        <div class="col-6">
+                                            <div class="p-2 border border-danger rounded bg-danger bg-opacity-10">
+                                                <div class="small text-danger text-uppercase">Satış (Ask)</div>
+                                                <div class="fw-bold text-white" id="modal-ask">0.00</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-6">
+                                            <div class="p-2 border border-success rounded bg-success bg-opacity-10">
+                                                <div class="small text-success text-uppercase">Alış (Bid)</div>
+                                                <div class="fw-bold text-white" id="modal-bid">0.00</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- SENTIMENT GAUGE -->
+                            <div class="card bg-secondary bg-opacity-10">
+                                <div class="card-header small text-uppercase text-muted">Piyasa Duygusu (Sentiment)
+                                </div>
+                                <div class="card-body text-center">
+                                    <h3 class="display-6 fw-bold text-info" id="modal-sentiment">NÖTR</h3>
+                                    <div class="progress" style="height: 10px;">
+                                        <div class="progress-bar bg-info" role="progressbar" style="width: 50%;"
+                                            id="modal-sentiment-bar"></div>
+                                    </div>
+                                    <div class="small text-muted mt-2" id="modal-desc">Analiz yapılıyor...</div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Modal Logic
+        let detailModal = null;
+
+        function openDetailModal(coin) {
+            if (!detailModal) detailModal = new bootstrap.Modal(document.getElementById('detailModal'));
+
+            document.getElementById('modal-title').innerText = coin + " / TRY DETAY ANALİZİ";
+
+            // LOAD CHART
+            new TradingView.widget({
+                "width": "100%",
+                "height": 450,
+                "symbol": "BINANCE:" + coin + "USDT",
+                "interval": "60",
+                "timezone": "Etc/UTC",
+                "theme": "dark",
+                "style": "1",
+                "locale": "tr",
+                "toolbar_bg": "#f1f3f6",
+                "enable_publishing": false,
+                "hide_side_toolbar": false,
+                "allow_symbol_change": true,
+                "container_id": "tv_chart_container"
+            });
+
+            // FIND DATA
+            // Note: tableData is initialized in updateTable
+            // We need access to the latest data. 
+            // Ideally we pass it or find it from global scope.
+            // For now, let's just trigger based on what we have.
+
+            // UPDATE MODAL FIELDS
+            const mData = window.latestData ? window.latestData.find(m => m.coin === coin) : null;
+            if (mData) {
+                document.getElementById('modal-price').innerText = mData.paribu + " TL";
+                document.getElementById('modal-vol').innerText = parseInt(mData.volume || 0).toLocaleString('tr-TR') + " TL";
+
+                let spread = mData.spread || 0;
+                let sEl = document.getElementById('modal-spread');
+                sEl.innerText = "%" + spread.toFixed(2);
+                sEl.className = spread > 1.0 ? "badge bg-danger" : "badge bg-success";
+
+                document.getElementById('modal-ask').innerText = mData.ask || "-";
+                document.getElementById('modal-bid').innerText = mData.bid || "-";
+
+                document.getElementById('modal-sentiment').innerText = mData.sentiment;
+                document.getElementById('modal-desc').innerText = mData.desc;
+
+                // Bar Logic
+                let barVal = 50;
+                if (mData.sentiment === 'GÜÇLÜ AL') barVal = 90;
+                else if (mData.sentiment.includes('AL')) barVal = 75;
+                else if (mData.sentiment.includes('SAT')) barVal = 25;
+
+                document.getElementById('modal-sentiment-bar').style.width = barVal + "%";
+            }
+
+            detailModal.show();
+        }
+    </script>
+</body>
+
+</html>

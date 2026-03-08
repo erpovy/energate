@@ -1,0 +1,27 @@
+version: '3.3'
+
+services:
+  paribu-bot:
+    build: .
+    container_name: paribu-bot
+    restart: unless-stopped
+    tty: true
+    # command: tail -f /dev/null # Debug mode off
+    ports:
+      - "8086:5000"
+    volumes:
+      - .:/app
+      - /etc/localtime:/etc/localtime:ro
+    env_file:
+      - .env
+    environment:
+      - PARIBU_API_KEY=${PARIBU_API_KEY}
+      - PARIBU_API_SECRET=${PARIBU_API_SECRET}
+      - TRADE_AMOUNT_TL=${TRADE_AMOUNT_TL:-100}
+      - PRICE_DIFFERENCE_THRESHOLD=${PRICE_DIFFERENCE_THRESHOLD:-1.0}
+      - CHECK_INTERVAL=${CHECK_INTERVAL:-10}
+      - DRY_RUN=${DRY_RUN:-false}
+      - WEB_USERNAME=${WEB_USERNAME:-admin}
+      - WEB_PASSWORD=${WEB_PASSWORD}
+      - FLASK_DEBUG=${FLASK_DEBUG:-false}
+      - TZ=Europe/Istanbul # Fix Timezone
